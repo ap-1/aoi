@@ -8,7 +8,7 @@ token = os.getenv("TOKEN")
 
 intents = discord.Intents.all()
 client = commands.Bot(command_prefix=commands.when_mentioned_or('-'), intents=intents)
-activity = discord.Activity(activity=discord.ActivityType.listening, name="to you")
+activity = discord.Activity(type=discord.ActivityType.listening, name="you")
 
 @client.command()
 @commands.is_owner()
@@ -45,8 +45,8 @@ async def on_ready():
     await client.change_presence(status=discord.Status.dnd, activity=activity)
     print(f"{client.user.name} loaded.")
 
-    def init():
-    for cog in ["general"]:
+def init():
+    for cog in ["general", "owner"]:
         try:
             client.load_extension(f"aoi.cogs.{cog}")
         except commands.ExtensionFailed as err:
