@@ -7,7 +7,7 @@ dotenv.load_dotenv()
 token = os.getenv("TOKEN")
 
 intents = discord.Intents.all()
-client = commands.Bot(command_prefix=commands.when_mentioned_or('/'), intents=intents)
+client = commands.Bot(command_prefix=commands.when_mentioned_or('-'), intents=intents)
 activity = discord.Activity(activity=discord.ActivityType.listening, name="to you")
 
 @client.command()
@@ -19,12 +19,14 @@ async def load(ctx, *, name: str):
 		client.load_extension(f"aoi.cogs.{name}")
 	except commands.ExtensionNotFound:
 		await ctx.send(f"{name} doesn't exist")
+	except commands.ExtensionAlreadyLoaded:
+		await ctx.send(f"{name} is already loaded")
 	except commands.ExtensionFailed as err:
 		print(f"an error prevented {cog} from loading:\n{err}")
 	else:
 		await ctx.send(f"{name} has been loaded.")
 
-@commands.command()
+@client.command()
 @commands.is_owner()
 async def unload(ctx, *, name: str):
 	"""Unload a cog."""
