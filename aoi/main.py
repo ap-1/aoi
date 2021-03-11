@@ -3,17 +3,38 @@ import os, dotenv
 import discord
 from discord.ext import commands
 
+from discord_slash import SlashCommand
+from discord_slash.utils.manage_commands import create_option
+
 dotenv.load_dotenv()
 token = os.getenv("TOKEN")
 
 intents = discord.Intents.all()
-client = commands.Bot(command_prefix=commands.when_mentioned_or('-'), intents=intents)
-activity = discord.Activity(type=discord.ActivityType.listening, name="you")
+client = commands.Bot(command_prefix=commands.when_mentioned_or('/'), intents=intents)
+slash = SlashCommand(client, sync_commands=True, sync_on_cog_reload=True)
 
-@client.command()
-@commands.is_owner()
-async def load(ctx, *, name: str):
+activity = discord.Activity(type=discord.ActivityType.listening, name="you")
+guild_ids = [765588555010670654] #, 738965773531217972]
+
+@client.event
+async def on_ready():
+    await client.change_presence(status=discord.Status.dnd, activity=activity)
+    print(f"{client.user.name} loaded.")
+
+@slash.slash(name="load",
+             description="Load a cog.",
+             guild_ids=guild_ids,
+             options=[
+                create_option(
+                    name="cog",
+                    description="the cog to load",
+                    option_type=3,
+                    required=True
+                )
+             ])
+async def load(ctx, name: str):
     """Load a cog."""
+    await ctx.respond()
 
     try:
         client.load_extension(f"aoi.cogs.{name}")
@@ -26,10 +47,20 @@ async def load(ctx, *, name: str):
     else:
         await ctx.send(f"{name} has been loaded")
 
-@client.command()
-@commands.is_owner()
-async def unload(ctx, *, name: str):
+@slash.slash(name="unload",
+             description="Unload a cog.",
+             guild_ids=guild_ids,
+             options=[
+                create_option(
+                    name="cog",
+                    description="the cog to unload",
+                    option_type=3,
+                    required=True
+                )
+             ])
+async def unload(ctx, name: str):
     """Unload a cog."""
+    await ctx.respond()
 
     try:
         client.unload_extension(f"aoi.cogs.{name}")
@@ -40,11 +71,6 @@ async def unload(ctx, *, name: str):
     else:
         await ctx.send(f"unloaded {name}")
 
-@client.event
-async def on_ready():
-    await client.change_presence(status=discord.Status.dnd, activity=activity)
-    print(f"{client.user.name} loaded.")
-
 def init():
     for cog in ["general", "owner"]:
         try:
@@ -52,4 +78,5 @@ def init():
         except commands.ExtensionFailed as err:
             print(f"an error prevented {cog} from loading:\n{err}")
 
+    client.remove_command("help")
     client.run(token, reconnect=True)

@@ -12,6 +12,7 @@ authors = ["ap-1 <67872951+ap-1@users.noreply.github.com>"]
 python = "^3.9"
 discord = "^1.0.1"
 python-dotenv = "^0.15.0"
+discord-py-slash-command = "^1.0.9"
 
 [tool.poetry.scripts]
 start = "aoi.main:init"

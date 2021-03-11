@@ -18,18 +18,6 @@ yarl = ">=1.0,<2.0"
 speedups = ["aiodns", "brotlipy", "cchardet"]
 
 [[package]]
-name = "ast"
-version = "0.0.2"
-description = "Conversion between protobuf3 and srcML."
-category = "main"
-optional = false
-python-versions = "*"
-
-[package.extras]
-faster-signatures = ["ed25519ll"]
-signatures = ["keyring", "keyrings.alt", "importlib", "pyxdg"]
-
-[[package]]
 name = "async-timeout"
 version = "3.0.1"
 description = "Timeout context manager for asyncio programs"
@@ -69,6 +57,14 @@ python-versions = "*"
 
 [package.dependencies]
 "discord.py" = ">=1.0.1"
+
+[[package]]
+name = "discord-py-slash-command"
+version = "1.0.9.5"
+description = "A simple discord slash command handler for discord.py."
+category = "main"
+optional = false
+python-versions = ">=3.6"
 
 [[package]]
 name = "discord.py"
@@ -135,7 +131,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "7b33fa18478ace796861e2d1cc832a01cdb933b4f39d7a342b4a859328950316"
+content-hash = "31183573373ae90334193d9f56efa5d47932a38e6ab9cdd210d816b03a65e183"
 
 [metadata.files]
 aiohttp = [
@@ -177,10 +173,6 @@ aiohttp = [
     {file = "aiohttp-3.7.4.post0-cp39-cp39-win_amd64.whl", hash = "sha256:02f46fc0e3c5ac58b80d4d56eb0a7c7d97fcef69ace9326289fb9f1955e65cfe"},
     {file = "aiohttp-3.7.4.post0.tar.gz", hash = "sha256:493d3299ebe5f5a7c66b9819eacdcfbbaaf1a8e84911ddffcdc48888497afecf"},
 ]
-ast = [
-    {file = "AST-0.0.2-py2-none-any.whl", hash = "sha256:04cf2827c4048d18635ca8f85357a4285d140424ac26028be0dc585f824e07cd"},
-    {file = "AST-0.0.2.tar.gz", hash = "sha256:dc5b79c6ba11aea72c59c791a0bc5ae483b4c18fec6f643002d6fae24361eba0"},
-]
 async-timeout = [
     {file = "async-timeout-3.0.1.tar.gz", hash = "sha256:0c3c816a028d47f659d6ff5c745cb2acf1f966da1fe5c19c77a70282b25f4c5f"},
     {file = "async_timeout-3.0.1-py3-none-any.whl", hash = "sha256:4291ca197d287d274d0b6cb5d6f8f8f82d434ed288f962539ff18cc9012f9ea3"},
@@ -196,6 +188,10 @@ chardet = [
 discord = [
     {file = "discord-1.0.1-py3-none-any.whl", hash = "sha256:9d4debb4a37845543bd4b92cb195bc53a302797333e768e70344222857ff1559"},
     {file = "discord-1.0.1.tar.gz", hash = "sha256:ff6653655e342e7721dfb3f10421345fd852c2a33f2cca912b1c39b3778a9429"},
+]
+discord-py-slash-command = [
+    {file = "discord-py-slash-command-1.0.9.5.tar.gz", hash = "sha256:d9ebe87656485e8230baa0ab849705e72e4fed9d65ee16ae017673ec1a5f00e8"},
+    {file = "discord_py_slash_command-1.0.9.5-py3-none-any.whl", hash = "sha256:821ae953a0d7f40820c308c45c8c0856bfd8bbf4ce390dbea9feb31af1081972"},
 ]
 "discord.py" = [
     {file = "discord.py-1.6.0-py3-none-any.whl", hash = "sha256:3df148daf6fbcc7ab5b11042368a3cd5f7b730b62f09fb5d3cbceff59bcfbb12"},
