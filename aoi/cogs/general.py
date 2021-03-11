@@ -11,9 +11,7 @@ class General(commands.Cog, name="General Commands"):
                        description="Find the latency from the bot to discord.",
                        guild_ids=guild_ids)
     async def ping(self, ctx):
-        """Find the latency from the bot to discord."""
         await ctx.respond()
-
         await ctx.send(f"pong! ({self.bot.latency * 1000} ms)")
 
 

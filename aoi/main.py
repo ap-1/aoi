@@ -1,4 +1,5 @@
 import os, dotenv
+from aoi.utility import is_owner
 
 import discord
 from discord.ext import commands
@@ -32,8 +33,8 @@ async def on_ready():
                     required=True
                 )
              ])
+@is_owner
 async def load(ctx, name: str):
-    """Load a cog."""
     await ctx.respond()
 
     try:
@@ -58,8 +59,8 @@ async def load(ctx, name: str):
                     required=True
                 )
              ])
+@is_owner
 async def unload(ctx, name: str):
-    """Unload a cog."""
     await ctx.respond()
 
     try:
