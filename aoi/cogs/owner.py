@@ -36,10 +36,10 @@ class Owner(commands.Cog, name="Owner Commands"):
         """ Execute arbitrary python code in an environment similar to that of a command. """
         
         code = remove_markdown(code)
-        fn_name = "_aoi_eval"
+        closure = "_aoi_eval"
 
-        code = "\n".join(f"    {i}" for i in code.splitlines())
-        body = f"async def {fn_name}():\n{code}"
+        code = "\n".join(f"    {line}" for line in code.splitlines())
+        body = f"async def {closure}():\n{code}"
 
         try:
             parsed = ast.parse(body)
@@ -65,9 +65,10 @@ class Owner(commands.Cog, name="Owner Commands"):
 
             insert_returns(body)
             exec(compile(parsed, filename="<eval>", mode="exec"), environment)
-            result = await eval(f"{fn_name}()", environment)
-
-            await ctx.send(result)
+            result = await eval(f"{closure}()", environment)
+            
+            if result != None and result != "":
+                await ctx.send(result)
         except Exception as err:
             embed = discord.Embed(
             	title=f"{type(err).__name__}",
