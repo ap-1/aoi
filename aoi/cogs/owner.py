@@ -18,6 +18,14 @@ def insert_returns(body):
 	if isinstance(body[-1], ast.With) or isinstance(body[-1], ast.AsyncWith):
 		insert_returns(body[-1].body)
 
+def remove_markdown(code: str):
+    return code.replace("py", ' ').strip("` ").translate(str.maketrans({
+        '‘': "'",
+        '’': "'",
+        '“': "\"",
+        '”': "\"",
+    }))
+
 class Owner(commands.Cog, name="Owner Commands"):
     def __init__(self, bot):
         self.bot = bot
@@ -26,10 +34,8 @@ class Owner(commands.Cog, name="Owner Commands"):
     @commands.is_owner()
     async def _eval(self, ctx, *, code: str):
         """ Execute arbitrary python code in an environment similar to that of a command. """
-
-        # SOURCE: https://gist.github.com/nitros12/2c3c265813121492655bc95aa54da6b9
-
-        code = code.replace("py", ' ').strip("` ")
+        
+        code = remove_markdown(code)
         fn_name = "_aoi_eval"
 
         code = "\n".join(f"    {i}" for i in code.splitlines())
@@ -63,7 +69,12 @@ class Owner(commands.Cog, name="Owner Commands"):
 
             await ctx.send(result)
         except Exception as err:
-            embed = discord.Embed(title=f"{type(err).__name__}", description=f"{err}", timestamp=ctx.message.created_at)
+            embed = discord.Embed(
+            	title=f"{type(err).__name__}",
+                description=f"{err}",
+                timestamp=ctx.message.created_at,
+                color=discord.Color.from_rgb(255, 74, 74)
+            )
             embed.set_author(name="Evaluation Failure")
             embed.set_footer(text=ctx.author.name)
 
