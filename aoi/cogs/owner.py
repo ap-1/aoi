@@ -1,7 +1,9 @@
 import ast
+from aoi.utility import is_owner
 
 import discord
 from discord.ext import commands
+from discord.utils import escape_markdown
 
 from discord_slash import cog_ext
 from discord_slash.utils.manage_commands import create_option
@@ -43,7 +45,8 @@ class Owner(commands.Cog, name="Owner Commands"):
                                required=True
                            )
                        ])
-    async def _eval(self, ctx, *, code: str):    
+    @is_owner
+    async def _eval(self, ctx, code: str):    
         await ctx.respond()
 
         code = remove_markdown(code)
@@ -51,16 +54,9 @@ class Owner(commands.Cog, name="Owner Commands"):
 
         code = "\n".join(f"    {line}" for line in code.splitlines())
         body = f"async def {closure}():\n{code}"
-        await ctx.send(f"```py\n{body}\n```")
+        await ctx.send(f"```py\n{body}\n\nawait _aoi_eval()\n```")
 
         try:
-            if not await self.bot.is_owner(ctx.author):
-                embed = discord.Embed(description="This command is owner-only.",
-                                      color=discord.Color.from_rgb(255, 74, 74))
-                embed.set_author(name="Error")
-
-                return await ctx.send(embed=embed)
-            
             parsed = ast.parse(body)
             body = parsed.body[0].body
             environment = {
@@ -96,6 +92,36 @@ class Owner(commands.Cog, name="Owner Commands"):
             embed.set_footer(text=ctx.author.name)
 
             await ctx.send(embed=embed)
+
+    @cog_ext.cog_slash(name="environment",
+                       description="View the environment used in the eval command.",
+                       guild_ids=guild_ids,
+                       options=[])
+    @is_owner
+    async def environment(self, ctx):
+        await ctx.respond()
+
+        environment = {
+            # bot
+            "ctx": ctx,
+            "bot": self.bot,
+            "client": self.bot,
+
+            # utility
+            "discord": discord,
+            "commands": commands,
+            "__name__": __name__,
+            "__import__": __import__,
+
+            # shorthands
+            "guild": ctx.guild,
+            "author": ctx.author,
+            "channel": ctx.channel,
+        }
+
+        message = "\n".join([f"- {var}: {environment[var]}" for var in environment])
+        await ctx.send(escape_markdown(message))
+
 
 def setup(bot):
     bot.add_cog(Owner(bot))
