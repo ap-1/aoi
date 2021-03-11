@@ -9,6 +9,12 @@ from discord_slash import cog_ext
 from discord_slash.utils.manage_commands import create_option
 
 guild_ids = [765588555010670654]
+replacements = str.maketrans({
+    '‘': "'",
+    '’': "'",
+    '“': "\"",
+    '”': "\"",
+})
 
 def insert_returns(body):
 	if isinstance(body[-1], ast.Expr):
@@ -23,12 +29,7 @@ def insert_returns(body):
 		insert_returns(body[-1].body)
 
 def remove_markdown(code: str):
-    return code.replace("py", ' ').strip("` ").translate(str.maketrans({
-        '‘': "'",
-        '’': "'",
-        '“': "\"",
-        '”': "\"",
-    }))
+    return code.replace("py", ' ').strip("` ").translate(replacements)
 
 class Owner(commands.Cog, name="Owner Commands"):
     def __init__(self, bot):
@@ -51,33 +52,30 @@ class Owner(commands.Cog, name="Owner Commands"):
 
         code = remove_markdown(code)
         closure = "_aoi_eval"
+        environment = {
+            # bot
+            "ctx": ctx,
+            "bot": self.bot,
+            "client": self.bot,
 
-        code = "\n".join(f"    {line}" for line in code.splitlines())
-        body = f"async def {closure}():\n{code}"
-        await ctx.send(f"```py\n{body}\n\nawait _aoi_eval()\n```")
+            # utility
+            "discord": discord,
+            "commands": commands,
+            "__name__": __name__,
+            "__import__": __import__,
+
+            # shorthands
+            "guild": ctx.guild,
+            "author": ctx.author,
+            "channel": ctx.channel,
+        }
+
+        code = "\n".join(f"\t{line}" for line in code.splitlines())
+        parsed = ast.parse(f"async def {closure}():\n{code}")
+        await ctx.send(f"```py\n{ast.unparse(parsed)}\n\nawait _aoi_eval()\n```")
 
         try:
-            parsed = ast.parse(body)
-            body = parsed.body[0].body
-            environment = {
-                # bot
-                "ctx": ctx,
-                "bot": self.bot,
-                "client": self.bot,
-
-                # utility
-                "discord": discord,
-                "commands": commands,
-                "__name__": __name__,
-                "__import__": __import__,
-
-                # shorthands
-                "guild": ctx.guild,
-                "author": ctx.author,
-                "channel": ctx.channel,
-            }
-
-            insert_returns(body)
+            insert_returns(parsed.body[0].body)
             exec(compile(parsed, filename="<eval>", mode="exec"), environment)
             result = await eval(f"{closure}()", environment)
 
