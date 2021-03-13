@@ -28,8 +28,8 @@ def insert_returns(body):
 	if isinstance(body[-1], ast.With) or isinstance(body[-1], ast.AsyncWith):
 		insert_returns(body[-1].body)
 
-def remove_markdown(code: str):
-    return code.replace("py", ' ').strip("` ").translate(replacements)
+def format_body(code: str):
+    return code.replace("py", ' ').strip("` ").translate(replacements).splitlines()
 
 class Owner(commands.Cog, name="Owner Commands"):
     def __init__(self, bot):
@@ -50,8 +50,8 @@ class Owner(commands.Cog, name="Owner Commands"):
     async def _eval(self, ctx, code: str):    
         await ctx.respond()
 
-        code = remove_markdown(code)
         closure = "_aoi_eval"
+        code = "\n".join(f"\t{line}" for line in format_body(code))
         environment = {
             # bot
             "ctx": ctx,
@@ -70,12 +70,11 @@ class Owner(commands.Cog, name="Owner Commands"):
             "channel": ctx.channel,
         }
 
-        code = "\n".join(f"\t{line}" for line in code.splitlines())
-        parsed = ast.parse(f"async def {closure}():\n{code}")
-        await ctx.send(f"```py\n{ast.unparse(parsed)}\n\nawait _aoi_eval()\n```")
-
         try:
+            parsed = ast.parse(f"async def {closure}():\n{code}")
             insert_returns(parsed.body[0].body)
+            await ctx.send(f"```py\n{ast.unparse(parsed)}\n\nawait {closure}()\n```")
+
             exec(compile(parsed, filename="<eval>", mode="exec"), environment)
             result = await eval(f"{closure}()", environment)
 
