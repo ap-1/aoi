@@ -1,4 +1,5 @@
-import os, dotenv
+import os
+import dotenv
 from aoi.utility import is_owner
 
 import discord
