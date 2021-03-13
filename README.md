@@ -1,5 +1,7 @@
 # aoi
 
+Python 3.9 must be installed.
+
 ## option_type
 
 | Name              | Code |
