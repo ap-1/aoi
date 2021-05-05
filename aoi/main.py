@@ -16,7 +16,7 @@ client = commands.Bot(command_prefix=commands.when_mentioned_or('/'), intents=in
 slash = SlashCommand(client, sync_commands=True, sync_on_cog_reload=True)
 
 activity = discord.Activity(type=discord.ActivityType.listening, name="you")
-guild_ids = [765588555010670654] #, 738965773531217972]
+guild_ids = [765588555010670654, 738965773531217972]
 
 @client.event
 async def on_ready():
@@ -74,11 +74,11 @@ async def unload(ctx, name: str):
         await ctx.send(f"unloaded {name}")
 
 def init():
-    for cog in ["general", "owner"]:
+    for cog in ["general", "owner", "reddit", "ghost"]:
         try:
             client.load_extension(f"aoi.cogs.{cog}")
         except commands.ExtensionFailed as err:
             print(f"an error prevented {cog} from loading:\n{err}")
 
-    client.remove_command("help")
+    # client.remove_command("help")
     client.run(token, reconnect=True)
