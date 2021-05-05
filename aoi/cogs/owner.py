@@ -8,7 +8,7 @@ from discord.utils import escape_markdown
 from discord_slash import cog_ext
 from discord_slash.utils.manage_commands import create_option
 
-guild_ids = [765588555010670654]
+guild_ids = [765588555010670654, 738965773531217972]
 replacements = str.maketrans({
     '‘': "'",
     '’': "'",
