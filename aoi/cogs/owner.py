@@ -7,6 +7,7 @@ from discord.utils import escape_markdown
 
 from discord_slash import cog_ext
 from discord_slash.utils.manage_commands import create_option
+from datetime import datetime as time
 
 guild_ids = [765588555010670654, 738965773531217972]
 replacements = str.maketrans({
@@ -83,7 +84,7 @@ class Owner(commands.Cog, name="Owner Commands"):
         except Exception as err:
             embed = discord.Embed(title=f"{type(err).__name__}",
                                   description=f"{err}",
-                                  timestamp=ctx.message.created_at,
+                                  timestamp=time.utcnow(),
                                   color=discord.Color.from_rgb(255, 74, 74))
             embed.set_author(name="Evaluation Failure")
             embed.set_footer(text=ctx.author.name)
