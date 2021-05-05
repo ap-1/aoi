@@ -1,6 +1,6 @@
 # aoi
 
-Python 3.9 must be installed.
+Python 3.9 must be installed. To start the bot, use `poetry run start`.
 
 ## option_type
 
