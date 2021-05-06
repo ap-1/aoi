@@ -1,6 +1,6 @@
 import discord
 
-guild_ids = [765588555010670654, 738965773531217972]
+whitelisted_guilds = [765588555010670654, 738965773531217972]
 
 def is_owner(func):
     async def check(*args): # COGS: self, ctx, *args || MAIN: ctx, *args
