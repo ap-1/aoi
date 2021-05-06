@@ -1,5 +1,6 @@
 import os
 import dotenv
+
 from aoi.utility import is_owner
 
 import discord
@@ -74,11 +75,11 @@ async def unload(ctx, name: str):
         await ctx.send(f"unloaded {name}")
 
 def init():
-    for cog in ["general", "owner", "reddit", "ghost"]:
+    for cog in ["general", "owner", "reddit", "quotes", "ghost"]:
         try:
             client.load_extension(f"aoi.cogs.{cog}")
         except commands.ExtensionFailed as err:
             print(f"an error prevented {cog} from loading:\n{err}")
 
-    # client.remove_command("help")
+    client.remove_command("help")
     client.run(token, reconnect=True)
