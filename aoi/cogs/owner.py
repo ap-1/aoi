@@ -1,5 +1,5 @@
 import ast
-from aoi.utility import is_owner
+from aoi.utility import is_owner, whitelisted_guilds
 
 import discord
 from discord.ext import commands
@@ -9,7 +9,6 @@ from discord_slash import cog_ext
 from discord_slash.utils.manage_commands import create_option
 from datetime import datetime as time
 
-guild_ids = [765588555010670654, 738965773531217972]
 replacements = str.maketrans({
     '‘': "'",
     '’': "'",
@@ -38,7 +37,7 @@ class Owner(commands.Cog, name="Owner Commands"):
 
     @cog_ext.cog_slash(name="eval",
                        description="Execute arbitrary python code in an environment similar to that of a command.",
-                       guild_ids=guild_ids,
+                       guild_ids=whitelisted_guilds,
                        options=[
                            create_option(
                                name="code",
@@ -93,7 +92,7 @@ class Owner(commands.Cog, name="Owner Commands"):
 
     @cog_ext.cog_slash(name="environment",
                        description="View the environment used in the eval command.",
-                       guild_ids=guild_ids,
+                       guild_ids=whitelisted_guilds,
                        options=[])
     @is_owner
     async def environment(self, ctx):
