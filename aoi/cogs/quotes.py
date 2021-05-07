@@ -105,7 +105,7 @@ class Quotes(commands.Cog, name="Quote Commands"):
         embed.set_author(name=user.name)
         embed.set_thumbnail(url=user.avatar_url)
         embed.set_footer(
-            text=f"{'Quoted by ' if quoter.id == quote['by'] else ''}{quoter.name}",
+            text=f"{'Quoted by ' if quoter.id == quote['by'] else 'Requested by '}{quoter.name}",
             icon_url=quoter.avatar_url
         )
 
