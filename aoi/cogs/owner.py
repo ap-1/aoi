@@ -1,4 +1,6 @@
 import ast
+
+from datetime import datetime as time
 from aoi.utility import is_owner, whitelisted_guilds
 
 import discord
@@ -7,7 +9,6 @@ from discord.utils import escape_markdown
 
 from discord_slash import cog_ext
 from discord_slash.utils.manage_commands import create_option
-from datetime import datetime as time
 
 replacements = str.maketrans({
     '‘': "'",
@@ -29,7 +30,7 @@ def insert_returns(body):
 		insert_returns(body[-1].body)
 
 def format_body(code: str):
-    return code.replace("py", ' ').strip("` ").translate(replacements).splitlines()
+    return code.translate(replacements).splitlines()
 
 class Owner(commands.Cog, name="Owner Commands"):
     def __init__(self, bot):
@@ -62,6 +63,7 @@ class Owner(commands.Cog, name="Owner Commands"):
             "discord": discord,
             "commands": commands,
             "__name__": __name__,
+            "__file__": __file__,
             "__import__": __import__,
 
             # shorthands
