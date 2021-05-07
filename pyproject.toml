@@ -14,6 +14,7 @@ discord = "^1.0.1"
 python-dotenv = "^0.15.0"
 discord-py-slash-command = "^1.0.9"
 asyncpraw = "^7.2.0"
+aiohttp = "^3.7.4"
 
 [tool.poetry.scripts]
 start = "aoi.main:init"
