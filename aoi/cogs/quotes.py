@@ -1,15 +1,14 @@
-import os
-import sys
 import json
 import random
+
+from datetime import datetime as time
+from aoi.utility import whitelisted_guilds
 
 import discord
 from discord.ext import commands
 
 from discord_slash import cog_ext
 from discord_slash.utils.manage_commands import create_option
-
-from datetime import datetime as time
 
 # if database handler stored in a higher directory, this is required before import:
 # sys.path.insert(1, os.path.realpath(os.path.pardir))
@@ -27,7 +26,7 @@ class Quotes(commands.Cog, name="Quote Commands"):
 
     @cog_ext.cog_slash(name="quote_user",
                        description="Create a quote for the given user.",
-                       guild_ids=guild_ids,
+                       guild_ids=whitelisted_guilds,
                        options=[
                            create_option(
                                name="user",
@@ -46,8 +45,17 @@ class Quotes(commands.Cog, name="Quote Commands"):
         await ctx.respond()
 
         timestamp = time.utcnow()
-        user_id = str(user.id)
+        embed = discord.Embed(title="",
+                              description=f"\"{quote}\"",
+                              timestamp=timestamp,
+                              color=discord.Color.from_rgb(46, 204, 113))
+        embed.set_author(name=user.name)
+        embed.set_thumbnail(url=user.avatar_url)
+        embed.set_footer(text=f"Quoted by {ctx.author.name}", icon_url=ctx.author.avatar_url)
 
+        await ctx.send(embed=embed)
+
+        user_id = str(user.id)
         current = quote_data.get(user_id, [])
         current.append({
             "timestamp": timestamp.isoformat(),
@@ -58,20 +66,10 @@ class Quotes(commands.Cog, name="Quote Commands"):
         quote_data[user_id] = current
         with open(quote_file, "w") as quotes:
             json.dump(quote_data, quotes, indent=4, sort_keys=True)
-        
-        embed = discord.Embed(title="",
-                              description=f"- {user.name}",
-                              timestamp=timestamp,
-                              color=discord.Color.from_rgb(46, 204, 113))
-        embed.set_author(name=quote)
-        embed.set_thumbnail(url=user.avatar_url)
-        embed.set_footer(text=f"Quoted by {ctx.author.name}", icon_url=ctx.author.avatar_url)
-
-        await ctx.send(embed=embed)
     
     @cog_ext.cog_slash(name="quote",
                        description="Retrieve a random quote by the given user.",
-                       guild_ids=guild_ids,
+                       guild_ids=whitelisted_guilds,
                        options=[
                            create_option(
                                name="user",
@@ -86,7 +84,7 @@ class Quotes(commands.Cog, name="Quote Commands"):
         quote_list = quote_data.get(str(user.id), False)
         if not quote_list:
             embed = discord.Embed(title="No Quotes",
-                                  description="The requested user does not have any saved quotes.",
+                                  description=f"{user.mention} has no saved quotes.",
                                   timestamp=time.utcnow(),
                                   color=discord.Color.from_rgb(255, 74, 74))
             embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar_url)
@@ -101,10 +99,10 @@ class Quotes(commands.Cog, name="Quote Commands"):
             quoter = ctx.author
 
         embed = discord.Embed(title="",
-                              description=f"- {user.name}",
+                              description=f"\"{quote['message']}\"",
                               timestamp=time.fromisoformat(quote["timestamp"]),
-                              color=discord.Color.random())
-        embed.set_author(name=quote["message"])
+                              color=user.color)
+        embed.set_author(name=user.name)
         embed.set_thumbnail(url=user.avatar_url)
         embed.set_footer(
             text=f"{'Quoted by ' if quoter.id == quote['by'] else ''}{quoter.name}",
