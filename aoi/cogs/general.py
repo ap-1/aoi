@@ -15,23 +15,23 @@ class General(commands.Cog, name="General Commands"):
         self.bot = bot
 
     @cog_ext.cog_slash(name="ping",
-                    description="Find the latency from the bot to discord.",
-                    guild_ids=whitelisted_guilds)
+                       description="Find the latency from the bot to discord.",
+                       guild_ids=whitelisted_guilds)
     async def ping(self, ctx):
         await ctx.respond()
         await ctx.send(f"pong! ({self.bot.latency * 1000} ms)")
     
     @cog_ext.cog_slash(name="numberfact",
-                    description="Get a random fact for the provided number.",
-                    guild_ids=whitelisted_guilds,
-                    options=[
-                        create_option(
-                            name="number",
-                            description="the number to get a fact for",
-                            option_type=4,
-                            required=True
-                        )
-                    ])
+                       description="Get a random fact for the provided number.",
+                       guild_ids=whitelisted_guilds,
+                       options=[
+                           create_option(
+                               name="number",
+                               description="the number to get a fact for",
+                               option_type=4,
+                               required=True
+                           )
+                       ])
     async def numberfact(self, ctx, number: int):
         await ctx.respond()
 
