@@ -1,7 +1,7 @@
 import os
 import dotenv
 
-from aoi.utility import is_owner
+from aoi.utility import is_owner, whitelisted_guilds
 
 import discord
 from discord.ext import commands
@@ -13,11 +13,10 @@ dotenv.load_dotenv()
 token = os.getenv("TOKEN")
 
 intents = discord.Intents.all()
+activity = discord.Activity(type=discord.ActivityType.listening, name="you")
+
 client = commands.Bot(command_prefix=commands.when_mentioned_or('/'), intents=intents)
 slash = SlashCommand(client, sync_commands=True, sync_on_cog_reload=True)
-
-activity = discord.Activity(type=discord.ActivityType.listening, name="you")
-guild_ids = [765588555010670654, 738965773531217972]
 
 @client.event
 async def on_ready():
@@ -26,7 +25,7 @@ async def on_ready():
 
 @slash.slash(name="load",
              description="Load a cog.",
-             guild_ids=guild_ids,
+             guild_ids=whitelisted_guilds,
              options=[
                 create_option(
                     name="cog",
@@ -52,7 +51,7 @@ async def load(ctx, name: str):
 
 @slash.slash(name="unload",
              description="Unload a cog.",
-             guild_ids=guild_ids,
+             guild_ids=whitelisted_guilds,
              options=[
                 create_option(
                     name="cog",
