@@ -20,7 +20,7 @@ def check_ping(client, message: discord.Message):
 async def send_notification(message: discord.Message, mentions):
     pings = [mention.name for mention in mentions or message.mentions]
     title = f"{', '.join(pings[:-1])}, and {pings[-1]}" if len(pings) > 2 \
-        else f"{pings[0]}{f'and {pings[1]}' if len(pings) == 2 else ''}"
+        else f"{pings[0]}{f' and {pings[1]}' if len(pings) == 2 else ''}"
 
     embed = discord.Embed(
         title=f"{message.author.name} has ghost pinged {title}",
