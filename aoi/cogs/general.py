@@ -60,10 +60,12 @@ class General(commands.Cog, name="General Commands"):
 
         async with aiohttp.ClientSession() as session:
             async with session.get(f"https://yesno.wtf/api") as response:
-                embed = discord.Embed(title=response["answer"],
+                result = await response.json()
+
+                embed = discord.Embed(title=result["answer"],
                                     timestamp=time.utcnow(),
                                     color=discord.Color.random())
-                embed.set_image(url=response["image"])
+                embed.set_image(url=result["image"])
                 embed.set_author(name=message)
                 embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar_url)
                 await ctx.send(embed=embed)
