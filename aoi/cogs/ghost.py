@@ -6,19 +6,24 @@ from datetime import datetime as time
 no_mentions = discord.AllowedMentions.none()
 
 def check_ping(client, message: discord.Message):
-    if message.author == client:
+    if message.author == client or client.is_owner(message.author):
         return False
 
-    # check if message had mentions that weren't just the bot
-    pinged_bot = len(message.mentions) == 1 and message.mentions[0] == client
-    return len(message.mentions) > 0 and not pinged_bot
+    pinged_bot = message.mentions[0] == client
+    pinged_self = message.mentions[0] == message.author
+    single_mention = len(message.mentions) == 1
+
+    return (len(message.mentions) > 0) and \
+        not (single_mention and pinged_bot) and \
+        not (single_mention and pinged_self)
 
 async def send_notification(message: discord.Message, mentions):
-    mentions = mentions or message.mentions
-    title = f"{message.author.name} has ghost pinged " + ", ".join(mention.name for mention in mentions)
-    
+    pings = [mention.name for mention in mentions or message.mentions]
+    title = f"{', '.join(pings[:-1])}, and {pings[-1]}" if len(pings) > 2 \
+        else f"{pings[0]}{f'and {pings[1]}' if len(pings) == 2 else ''}"
+
     embed = discord.Embed(
-        title=title,
+        title=f"{message.author.name} has ghost pinged {title}",
         description=f"Message content: {message.content}",
         timestamp=time.utcnow()
     )
@@ -39,10 +44,15 @@ class Ghost(commands.Cog, name="Ghost Ping Detection"):
         if not check_ping(self.bot.user, previous):
             return
 
-        mentions = [member for member in previous.mentions if not member in new.mentions]
+        mentions = [
+            member for member in previous.mentions if \
+                not member in new.mentions and \
+                not member.bot
+        ]
+
         if len(mentions) > 0:
             await send_notification(previous, mentions)
-    
+
 
 def setup(bot):
     bot.add_cog(Ghost(bot))
