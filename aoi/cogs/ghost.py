@@ -6,7 +6,7 @@ from datetime import datetime as time
 no_mentions = discord.AllowedMentions.none()
 
 def check_ping(client, message: discord.Message):
-    if message.author == client or client.is_owner(message.author):
+    if len(message.mentions) < 1 or message.author == client or client.is_owner(message.author):
         return False
 
     pinged_bot = message.mentions[0] == client
