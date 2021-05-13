@@ -15,7 +15,7 @@ token = os.getenv("TOKEN")
 intents = discord.Intents.all()
 activity = discord.Activity(type=discord.ActivityType.listening, name="you")
 
-client = commands.Bot(command_prefix=commands.when_mentioned_or('/'), intents=intents)
+client = commands.Bot(command_prefix=commands.when_mentioned, intents=intents)
 slash = SlashCommand(client, sync_commands=True, sync_on_cog_reload=True)
 
 async def check_undeletable(messages):
