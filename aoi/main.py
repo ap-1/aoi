@@ -89,7 +89,7 @@ async def unload(ctx, name: str):
         await ctx.send(f"unloaded {name}")
 
 def init():
-    for cog in ["general", "owner", "reddit", "quotes", "ghost"]:
+    for cog in ["general", "owner", "reddit", "quotes", "ghost", "voice"]:
         try:
             client.load_extension(f"aoi.cogs.{cog}")
         except commands.ExtensionFailed as err:
