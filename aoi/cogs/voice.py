@@ -1,5 +1,7 @@
+import asyncio
 import youtube_dl
 
+from collections import deque
 from aoi.utility import whitelisted_guilds
 
 import discord
@@ -21,6 +23,14 @@ ytdl = youtube_dl.YoutubeDL({
     "default_search": "auto",
     "source_address": "0.0.0.0"
 })
+
+def after(coro, loop):
+    future = asyncio.run_coroutine_threadsafe(coro, loop)
+
+    try:
+        future.result()
+    except Exception as err:
+        print(type(err).__name__, err)
 
 class Player(discord.PCMVolumeTransformer):
     def __init__(self, source, *, data, volume=1.0):
@@ -44,117 +54,151 @@ class Player(discord.PCMVolumeTransformer):
 class Voice(commands.Cog, name="Voice Commands"):
     def __init__(self, bot):
         self.bot = bot
+
         self.queue = {}
+        self.playing = {}
 
-    async def play_next(self, ctx):
+    @cog_ext.cog_slash(name="listen",
+                       description="Play audio from a YouTube video.",
+                       guild_ids=whitelisted_guilds,
+                       options=[
+                           create_option(
+                               name="url",
+                               description="the url of the video",
+                               option_type=3,
+                               required=True
+                           ),
+                           create_option(
+                               name="stream",
+                               description="whether the video is live or not",
+                               option_type=5,
+                               required=False
+                           )
+                       ])
+    async def listen(self, ctx, url: str, stream: bool = False):
         guild = ctx.guild
-        self.queue[guild].pop(0).source.cleanup()
+        bot_loop = self.bot.loop
 
-        if not guild.voice_client:
-            return await ctx.send("Stopped playing because the bot was disconnected.")
-
-        if len(self.queue) > 0:
-            player = self.queue[guild][0]
-
-            ctx.guild.voice_client.play(player, after=lambda _: self.play_next(ctx))
-            await ctx.send(f"Playing {player.title}")
-        else:
-            await ctx.send("Stopped playing because the queue is complete.")
-
-    @cog_ext.cog_subcommand(base="voice",
-                            name="play",
-                            description="Play audio from a YouTube video.",
-                            guild_ids=whitelisted_guilds,
-                            options=[
-                                create_option(
-                                    name="url",
-                                    description="the url of the video",
-                                    option_type=3,
-                                    required=True
-                                ),
-                                create_option(
-                                    name="stream",
-                                    description="whether the video is live or not",
-                                    option_type=5,
-                                    required=False
-                                ),
-                                create_option(
-                                    name="now",
-                                    description="whether to bypass the queue or not",
-                                    option_type=5,
-                                    required=False
-                                )
-                            ])
-    async def play(self, ctx, url: str, stream: bool = False, now: bool = False):
-        await ctx.respond()
-
-        guild = ctx.guild
         if not guild.voice_client:
             if ctx.author.voice:
                 await ctx.author.voice.channel.connect()
             else:
                 return await ctx.send("You must be connected to a voice channel.")
 
-        player = await Player.from_url(url, loop=self.bot.loop, stream=stream)
+        player = await Player.from_url(url, loop=bot_loop, stream=stream)
 
-        if not self.queue.get(guild, False):
-            self.queue[guild] = []
+        playing = self.playing.get(guild, None)
+        if not playing:
+            self.playing[guild] = False
+            playing = False
+        
+        queue = self.queue.get(guild, None)
+        if not queue:
+            self.queue[guild] = deque([])
+            queue = self.queue[guild]
 
-        queue = self.queue[guild]
-        size = len(queue)
-
-        if size > 0:
+        if len(queue) > 0 or playing:
             queue.append(player)
-            await ctx.send(f"Position in queue: {size}")
+
+            items = "\n".join([f'- {player.title}' for player in queue])
+            await ctx.send(f"Queued {player.title}\nPosition: {len(queue)}\n\n**Queue:**\n{items}")
         else:
-            ctx.guild.voice_client.play(player, after=lambda _: self.play_next(ctx))
-            await ctx.send(f"Playing {player.title}")
+            async def play_next():
+                self.playing[guild] = False
+                now_playing = None
 
-    @cog_ext.cog_subcommand(base="voice",
-                            name="pause",
-                            description="Pause the playing of audio.",
-                            guild_ids=whitelisted_guilds)
+                try:
+                    now_playing = self.queue[guild].popleft()
+                except:
+                    return await ctx.send("Stopped playback because the queue is complete.")
+                
+                if not guild.voice_client:
+                    return await ctx.send("Stopped playback because the bot was disconnected.")
+
+                self.playing[guild] = now_playing
+
+                await ctx.send(f"Playing {now_playing.title}")
+                guild.voice_client.play(now_playing, after=lambda _: after(play_next(), bot_loop))
+
+            queue.append(player)
+            await play_next()
+
+    @cog_ext.cog_slash(name="playing",
+                       description="View the music that is currently playing.",
+                       guild_ids=whitelisted_guilds)
+    async def playing(self, ctx):
+        guild = ctx.guild
+        playing = self.playing.get(ctx.guild, None)
+
+        if playing == None:
+            self.playing[guild] = False
+            playing = False
+        
+        await ctx.send(f"Now Playing: {playing}" if playing != False else "Nothing playing.")
+
+    @cog_ext.cog_slash(name="queue",
+                       description="View the music queue.",
+                       guild_ids=whitelisted_guilds)
+    async def queue(self, ctx):
+        guild = ctx.guild
+        queue = self.queue.get(guild, None)
+
+        if not queue:
+            self.queue[guild] = deque([])
+            queue = False
+
+        await ctx.send("\n".join([player.title for player in queue]) if queue else "Empty queue.")
+
+    @cog_ext.cog_slash(name="pause",
+                       description="Pause the music playback.",
+                       guild_ids=whitelisted_guilds)
     async def pause(self, ctx):
-        await ctx.respond()
-
         client = ctx.guild.voice_client
+        
         if not client:
             return await ctx.send("The bot is not connected to a voice channel.")
         
         if client.is_playing():
             client.pause()
+            await ctx.send("Paused playback.")
         else:
             client.resume()
+            await ctx.send("Resumed playback.")
 
-    @cog_ext.cog_subcommand(base="voice",
-                            name="volume",
-                            description="Adjust the volume of the bot.",
-                            guild_ids=whitelisted_guilds,
-                            options=[
-                                create_option(
-                                    name="number",
-                                    description="the volume to change the bot to",
-                                    option_type=4,
-                                    required=True
-                                )
-                            ])
+    @cog_ext.cog_slash(name="volume",
+                       description="Adjust the volume of the bot.",
+                       guild_ids=whitelisted_guilds,
+                       options=[
+                           create_option(
+                               name="percentage",
+                               description="the volume to change the bot to",
+                               option_type=4,
+                               required=True
+                           )
+                       ])
     async def volume(self, ctx, number: int):
-        await ctx.respond()
-
         if not ctx.guild.voice_client:
             return await ctx.send("The bot is not connected to a voice channel.")
-        
-        ctx.guild.voice_client.source.volume = max(0.0, min(1.0, number / 100))
-        await ctx.send(f"Adjusted volume to {number}")
 
-    @cog_ext.cog_subcommand(base="voice",
-                            name="stop",
-                            description="Make the bot leave its voice channel.",
-                            guild_ids=whitelisted_guilds)
+        ctx.guild.voice_client.source.volume = max(0.0, min(1.0, number / 100))
+        await ctx.send(f"Adjusted volume to {number}%")
+
+    @cog_ext.cog_slash(name="stop",
+                       description="Make the bot leave its voice channel.",
+                       guild_ids=whitelisted_guilds)
     async def stop(self, ctx):
         await ctx.respond()
 
-        await ctx.guild.voice_client.disconnect()
+        guild = ctx.guild
+        client = guild.voice_client
+
+        if client:
+            client.stop()
+            await client.disconnect()
+
+        self.playing[guild] = False
+        self.queue[guild] = deque([])
+
         await ctx.send("Disconnected from voice.")
 
 def setup(bot):
