@@ -39,16 +39,16 @@ async def on_ready():
     print(f"{client.user.name} loaded.")
 
 @slash.slash(name="load",
-            description="Load a cog.",
-            guild_ids=whitelisted_guilds,
-            options=[
-                create_option(
-                    name="cog",
-                    description="the cog to load",
-                    option_type=3,
-                    required=True
-                )
-            ])
+             description="Load a cog.",
+             guild_ids=whitelisted_guilds,
+             options=[
+                 create_option(
+                     name="cog",
+                     description="the cog to load",
+                     option_type=3,
+                     required=True
+                 )
+             ])
 @is_owner
 async def load(ctx, name: str):
     await ctx.respond()
@@ -65,16 +65,16 @@ async def load(ctx, name: str):
         await ctx.send(f"{name} has been loaded")
 
 @slash.slash(name="unload",
-            description="Unload a cog.",
-            guild_ids=whitelisted_guilds,
-            options=[
-                create_option(
-                    name="cog",
-                    description="the cog to unload",
-                    option_type=3,
-                    required=True
-                )
-            ])
+             description="Unload a cog.",
+             guild_ids=whitelisted_guilds,
+             options=[
+                 create_option(
+                     name="cog",
+                     description="the cog to unload",
+                     option_type=3,
+                     required=True
+                 )
+             ])
 @is_owner
 async def unload(ctx, name: str):
     await ctx.respond()
