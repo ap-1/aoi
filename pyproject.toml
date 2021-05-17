@@ -16,6 +16,7 @@ asyncpraw = "^7.2.0"
 "discord.py" = {extras = ["voice"], version = "^1.7.2"}
 discord-py-slash-command = "^1.0.9"
 youtube_dl = "^2021.4.26"
+pyquery = "^1.4.3"
 
 [tool.poetry.scripts]
 start = "aoi.main:init"
