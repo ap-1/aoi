@@ -59,7 +59,7 @@ class General(commands.Cog, name="General Commands"):
         await ctx.respond()
 
         async with aiohttp.ClientSession() as session:
-            async with session.get(f"https://yesno.wtf/api") as response:
+            async with session.get("https://yesno.wtf/api") as response:
                 result = await response.json()
 
                 embed = discord.Embed(title=result["answer"],
