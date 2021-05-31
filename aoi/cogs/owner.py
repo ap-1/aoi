@@ -80,7 +80,7 @@ class Owner(commands.Cog, name="Owner Commands"):
             exec(compile(parsed, filename="<eval>", mode="exec"), environment)
             result = await eval(f"{closure}()", environment)
 
-            if result != None and result != "":
+            if result is not None and result != "":
                 await ctx.send(result)
         except Exception as err:
             embed = discord.Embed(title=f"{type(err).__name__}",

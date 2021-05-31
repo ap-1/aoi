@@ -130,11 +130,11 @@ class Voice(commands.Cog, name="Voice Commands"):
         guild = ctx.guild
         playing = self.playing.get(ctx.guild, None)
 
-        if playing == None:
+        if playing is None:
             self.playing[guild] = False
             playing = False
         
-        await ctx.send(f"Now Playing: {playing}" if playing != False else "Nothing playing.")
+        await ctx.send(f"Now Playing: {playing}" if playing is not False else "Nothing playing.")
 
     @cog_ext.cog_slash(name="queue",
                        description="View the music queue.",
