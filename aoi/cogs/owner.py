@@ -26,7 +26,7 @@ def insert_returns(body):
 		insert_returns(body[-1].body)
 		insert_returns(body[-1].orelse)
 
-	if isinstance(body[-1], ast.With) or isinstance(body[-1], ast.AsyncWith):
+	if isinstance(body[-1], (ast.With, ast.AsyncWith)):
 		insert_returns(body[-1].body)
 
 def format_body(code: str):
