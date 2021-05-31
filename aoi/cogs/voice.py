@@ -87,12 +87,12 @@ class Voice(commands.Cog, name="Voice Commands"):
 
         player = await Player.from_url(url, loop=bot_loop, stream=stream)
 
-        playing = self.playing.get(guild, None)
+        playing = self.playing.get(guild)
         if not playing:
             self.playing[guild] = False
             playing = False
         
-        queue = self.queue.get(guild, None)
+        queue = self.queue.get(guild)
         if not queue:
             self.queue[guild] = deque([])
             queue = self.queue[guild]
@@ -128,7 +128,7 @@ class Voice(commands.Cog, name="Voice Commands"):
                        guild_ids=whitelisted_guilds)
     async def playing(self, ctx):
         guild = ctx.guild
-        playing = self.playing.get(ctx.guild, None)
+        playing = self.playing.get(ctx.guild)
 
         if playing is None:
             self.playing[guild] = False
@@ -141,7 +141,7 @@ class Voice(commands.Cog, name="Voice Commands"):
                        guild_ids=whitelisted_guilds)
     async def queue(self, ctx):
         guild = ctx.guild
-        queue = self.queue.get(guild, None)
+        queue = self.queue.get(guild)
 
         if not queue:
             self.queue[guild] = deque([])
